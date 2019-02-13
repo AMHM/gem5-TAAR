@@ -120,6 +120,10 @@ class Cache : public BaseCache
     void satisfyRequest(PacketPtr pkt, CacheBlk *blk,
                         bool deferred_response = false,
                         bool pending_downgrade = false) override;
+    
+    //AMHM Start
+    void HWLogger(CacheBlk *blk) override;
+    //AMHM End
 
     void doTimingSupplyResponse(PacketPtr req_pkt, const uint8_t *blk_data,
                                 bool already_copied, bool pending_inval);

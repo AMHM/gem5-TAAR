@@ -1,0 +1,10 @@
+called: /usr/bin/gcc
+	/home/disk500/csuser/gem5-FlexRel
+	gcc
+	--version
+
+called: /usr/bin/g++
+	/home/disk500/csuser/gem5-FlexRel
+	g++
+	--version
+

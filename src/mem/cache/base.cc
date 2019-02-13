@@ -802,6 +802,122 @@ BaseCache::getNextQueueEntry()
     return nullptr;
 }
 
+//AMHM Start
+void
+BaseCache::HWLogger(CacheBlk* blk)
+{
+    uint8_t bitSet[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80};
+    int noOfones = 0;
+    numberOfWriteOperations++;
+    for (int i = 0 ; i < blkSize ; i++)
+        for (int k = 0 ; k < 8; k++)
+            if (bitSet[k] & blk->data[i])
+                noOfones++;
+    if (noOfones < 10)
+        HWLessThan10++;
+    else if (noOfones < 20)
+        HWLessThan20++;
+    else if (noOfones < 30) 
+        HWLessThan30++;
+    else if (noOfones < 40)
+        HWLessThan40++;
+    else if (noOfones < 50)
+        HWLessThan50++;
+    else if (noOfones < 60)
+        HWLessThan60++;
+    else if (noOfones < 70)
+        HWLessThan70++;
+    else if (noOfones < 80)
+        HWLessThan80++;
+    else if (noOfones < 90)
+        HWLessThan90++;
+    else if (noOfones < 100)
+        HWLessThan100++;
+    else if (noOfones < 110)
+        HWLessThan110++;
+    else if (noOfones < 120)
+        HWLessThan120++;
+    else if (noOfones < 130)
+        HWLessThan130++;
+    else if (noOfones < 140)
+        HWLessThan140++;
+    else if (noOfones < 150)
+        HWLessThan150++;
+    else if (noOfones < 160)
+        HWLessThan160++;
+    else if (noOfones < 170) 
+        HWLessThan170++;
+    else if (noOfones < 180)
+        HWLessThan180++;
+    else if (noOfones < 190)
+        HWLessThan190++;
+    else if (noOfones < 200)
+        HWLessThan200++;
+    else if (noOfones < 210)
+        HWLessThan210++;
+    else if (noOfones < 220)
+        HWLessThan220++;
+    else if (noOfones < 230) 
+        HWLessThan230++;
+    else if (noOfones < 240)
+        HWLessThan240++;
+    else if (noOfones < 250)
+        HWLessThan250++;
+    else if (noOfones < 260) 
+        HWLessThan260++;
+    else if (noOfones < 270)
+        HWLessThan270++;
+    else if (noOfones < 280)
+        HWLessThan280++;
+    else if (noOfones < 290)
+        HWLessThan290++;
+    else if (noOfones < 300)
+        HWLessThan300++;
+    else if (noOfones < 310)
+        HWLessThan310++;
+    else if (noOfones < 320)
+        HWLessThan320++;
+    else if (noOfones < 330)
+        HWLessThan330++;
+    else if (noOfones < 340)
+        HWLessThan340++;
+    else if (noOfones < 350)
+        HWLessThan350++;
+    else if (noOfones < 360)
+        HWLessThan360++;
+    else if (noOfones < 370)
+        HWLessThan370++;
+    else if (noOfones < 380)
+        HWLessThan380++;
+    else if (noOfones < 390)
+        HWLessThan390++;
+    else if (noOfones < 400)
+        HWLessThan400++;
+    else if (noOfones < 410)
+        HWLessThan410++;
+    else if (noOfones < 420)
+        HWLessThan420++;
+    else if (noOfones < 430)
+        HWLessThan430++;
+    else if (noOfones < 440)
+        HWLessThan440++;
+    else if (noOfones < 450) 
+        HWLessThan450++;
+    else if (noOfones < 460)
+        HWLessThan460++;
+    else if (noOfones < 470)
+        HWLessThan470++;
+    else if (noOfones < 480)
+        HWLessThan480++;
+    else if (noOfones < 490)
+        HWLessThan490++;
+    else if (noOfones < 500)
+        HWLessThan500++;
+    else
+        HWOver500++;    
+}
+//AMHM End
+
 void
 BaseCache::satisfyRequest(PacketPtr pkt, CacheBlk *blk, bool, bool)
 {
@@ -844,6 +960,9 @@ BaseCache::satisfyRequest(PacketPtr pkt, CacheBlk *blk, bool, bool)
         // Write or WriteLine at the first cache with block in writable state
         if (blk->checkWrite(pkt)) {
             pkt->writeDataToBlock(blk->data, blkSize);
+            //AMHM Start
+            HWLogger(blk);
+            //AMHM End
         }
         // Always mark the line as dirty (and thus transition to the
         // Modified state) even if we are a failed StoreCond so we
@@ -1023,6 +1142,9 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         // nothing else to do; writeback doesn't expect response
         assert(!pkt->needsResponse());
         pkt->writeDataToBlock(blk->data, blkSize);
+        //AMHM Start
+        HWLogger(blk);
+        //AMHM End
         DPRINTF(Cache, "%s new state is %s\n", __func__, blk->print());
         incHitCount(pkt);
         // populate the time when the block will be ready to access.
@@ -1079,6 +1201,9 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         // nothing else to do; writeback doesn't expect response
         assert(!pkt->needsResponse());
         pkt->writeDataToBlock(blk->data, blkSize);
+        //AMHM Start
+        HWLogger(blk);
+        //AMHM End
         DPRINTF(Cache, "%s new state is %s\n", __func__, blk->print());
 
         incHitCount(pkt);
@@ -1212,6 +1337,9 @@ BaseCache::handleFill(PacketPtr pkt, CacheBlk *blk, PacketList &writebacks,
         assert(pkt->getSize() == blkSize);
 
         pkt->writeDataToBlock(blk->data, blkSize);
+        //AMHM Start
+        HWLogger(blk);
+        //AMHM End
     }
     // We pay for fillLatency here.
     blk->setWhenReady(clockEdge(fillLatency) + pkt->payloadDelay);
@@ -2216,6 +2344,216 @@ BaseCache::regStats()
         .name(name() + ".replacements")
         .desc("number of replacements")
         ;
+    //AMHM Start
+    HWLessThan10
+        .name(name() + ".HWLessThan10")
+        .desc("AMHM: number of references that have less than 10 ones")
+        ;
+    HWLessThan20
+        .name(name() + ".HWLessThan20")
+        .desc("AMHM: number of references that have less than 20 ones")
+        ;
+    HWLessThan30
+        .name(name() + ".HWLessThan30")
+        .desc("AMHM: number of references that have less than 30 ones")
+        ;
+    HWLessThan40
+        .name(name() + ".HWLessThan40")
+        .desc("AMHM: number of references that have less than 40 ones")
+        ;
+    HWLessThan50
+        .name(name() + ".HWLessThan50")
+        .desc("AMHM: number of references that have less than 50 ones")
+        ;
+    HWLessThan60
+        .name(name() + ".HWLessThan60")
+        .desc("AMHM: number of references that have less than 60 ones")
+        ;
+    HWLessThan70
+        .name(name() + ".HWLessThan70")
+        .desc("AMHM: number of references that have less than 70 ones")
+        ;
+    HWLessThan80
+        .name(name() + ".HWLessThan80")
+        .desc("AMHM: number of references that have less than 80 ones")
+        ;
+    HWLessThan90
+        .name(name() + ".HWLessThan90")
+        .desc("AMHM: number of references that have less than 90 ones")
+        ;
+    HWLessThan100
+        .name(name() + ".HWLessThan100")
+        .desc("AMHM: number of references that have less than 100 ones")
+        ;
+    HWLessThan110
+        .name(name() + ".HWLessThan110")
+        .desc("AMHM: number of references that have less than 110 ones")
+        ;
+    HWLessThan120
+        .name(name() + ".HWLessThan120")
+        .desc("AMHM: number of references that have less than 120 ones")
+        ;
+    HWLessThan130
+        .name(name() + ".HWLessThan130")
+        .desc("AMHM: number of references that have less than 130 ones")
+        ;
+    HWLessThan140
+        .name(name() + ".HWLessThan140")
+        .desc("AMHM: number of references that have less than 140 ones")
+        ;
+    HWLessThan150
+        .name(name() + ".HWLessThan150")
+        .desc("AMHM: number of references that have less than 150 ones")
+        ;
+    HWLessThan160
+        .name(name() + ".HWLessThan160")
+        .desc("AMHM: number of references that have less than 160 ones")
+        ;
+    HWLessThan170
+        .name(name() + ".HWLessThan170")
+        .desc("AMHM: number of references that have less than 170 ones")
+        ;
+    HWLessThan180
+        .name(name() + ".HWLessThan180")
+        .desc("AMHM: number of references that have less than 180 ones")
+        ;
+    HWLessThan190
+        .name(name() + ".HWLessThan190")
+        .desc("AMHM: number of references that have less than 190 ones")
+        ;
+    HWLessThan200
+        .name(name() + ".HWLessThan200")
+        .desc("AMHM: number of references that have less than 200 ones")
+        ;
+    HWLessThan210
+        .name(name() + ".HWLessThan210")
+        .desc("AMHM: number of references that have less than 210 ones")
+        ;
+    HWLessThan220
+        .name(name() + ".HWLessThan220")
+        .desc("AMHM: number of references that have less than 220 ones")
+        ;
+    HWLessThan230
+        .name(name() + ".HWLessThan230")
+        .desc("AMHM: number of references that have less than 230 ones")
+        ;
+    HWLessThan240
+        .name(name() + ".HWLessThan240")
+        .desc("AMHM: number of references that have less than 240 ones")
+        ;
+    HWLessThan250
+        .name(name() + ".HWLessThan250")
+        .desc("AMHM: number of references that have less than 250 ones")
+        ;
+    HWLessThan260
+        .name(name() + ".HWLessThan260")
+        .desc("AMHM: number of references that have less than 260 ones")
+        ;
+    HWLessThan270
+        .name(name() + ".HWLessThan270")
+        .desc("AMHM: number of references that have less than 270 ones")
+        ;
+    HWLessThan280
+        .name(name() + ".HWLessThan280")
+        .desc("AMHM: number of references that have less than 280 ones")
+        ;
+    HWLessThan290
+        .name(name() + ".HWLessThan290")
+        .desc("AMHM: number of references that have less than 290 ones")
+        ;
+    HWLessThan300
+        .name(name() + ".HWLessThan300")
+        .desc("AMHM: number of references that have less than 300 ones")
+        ;
+    HWLessThan310
+        .name(name() + ".HWLessThan310")
+        .desc("AMHM: number of references that have less than 310 ones")
+        ;
+    HWLessThan320
+        .name(name() + ".HWLessThan320")
+        .desc("AMHM: number of references that have less than 320 ones")
+        ;
+    HWLessThan330
+        .name(name() + ".HWLessThan330")
+        .desc("AMHM: number of references that have less than 330 ones")
+        ;
+    HWLessThan340
+        .name(name() + ".HWLessThan340")
+        .desc("AMHM: number of references that have less than 340 ones")
+        ;
+    HWLessThan350
+        .name(name() + ".HWLessThan350")
+        .desc("AMHM: number of references that have less than 350 ones")
+        ;
+    HWLessThan360
+        .name(name() + ".HWLessThan360")
+        .desc("AMHM: number of references that have less than 360 ones")
+        ;
+    HWLessThan370
+        .name(name() + ".HWLessThan370")
+        .desc("AMHM: number of references that have less than 370 ones")
+        ;
+    HWLessThan380
+        .name(name() + ".HWLessThan380")
+        .desc("AMHM: number of references that have less than 380 ones")
+        ;
+    HWLessThan390
+        .name(name() + ".HWLessThan390")
+        .desc("AMHM: number of references that have less than 390 ones")
+        ;
+    HWLessThan400
+        .name(name() + ".HWLessThan400")
+        .desc("AMHM: number of references that have less than 400 ones")
+        ;
+    HWLessThan410
+        .name(name() + ".HWLessThan410")
+        .desc("AMHM: number of references that have less than 410 ones")
+        ;
+    HWLessThan420
+        .name(name() + ".HWLessThan420")
+        .desc("AMHM: number of references that have less than 420 ones")
+        ;
+    HWLessThan430
+        .name(name() + ".HWLessThan430")
+        .desc("AMHM: number of references that have less than 430 ones")
+        ;
+    HWLessThan440
+        .name(name() + ".HWLessThan440")
+        .desc("AMHM: number of references that have less than 440 ones")
+        ;
+    HWLessThan450
+        .name(name() + ".HWLessThan450")
+        .desc("AMHM: number of references that have less than 450 ones")
+        ;
+    HWLessThan460
+        .name(name() + ".HWLessThan460")
+        .desc("AMHM: number of references that have less than 460 ones")
+        ;
+    HWLessThan470
+        .name(name() + ".HWLessThan470")
+        .desc("AMHM: number of references that have less than 470 ones")
+        ;
+    HWLessThan480
+        .name(name() + ".HWLessThan480")
+        .desc("AMHM: number of references that have less than 480 ones")
+        ;
+    HWLessThan490
+        .name(name() + ".HWLessThan490")
+        .desc("AMHM: number of references that have less than 490 ones")
+        ;
+    HWLessThan500
+        .name(name() + ".HWLessThan500")
+        .desc("AMHM: number of references that have less than 500 ones")
+        ;
+    HWOver500
+        .name(name() + ".HWOver500")
+        .desc("AMHM: number of references that have over 500 ones")
+        ;
+    numberOfWriteOperations
+        .name(name() + ".numberOfWriteOperations")
+        .desc("AMHM: total number of write operations")
+        ;    
+    //AMHM End
 }
 
 void

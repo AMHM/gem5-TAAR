@@ -1,0 +1,9 @@
+Python 2.7 or greater required, but you have Python 2.6.6
+
+You can use a non-default installation of the Python interpreter by
+rearranging your PATH so that scons finds the non-default 'python' and
+'python-config' first.
+
+For more details, see:
+    http://gem5.org/wiki/index.php/Using_a_non-default_Python_installation
+

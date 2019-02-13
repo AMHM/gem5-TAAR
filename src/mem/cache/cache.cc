@@ -84,7 +84,7 @@ Cache::satisfyRequest(PacketPtr pkt, CacheBlk *blk,
     BaseCache::satisfyRequest(pkt, blk);
 
     if (pkt->isRead()) {
-        // determine if this read is from a (coherent) cache or not
+        // determine if this read is from a (coherent) cacsatisfyRequesthe or not
         if (pkt->fromCache()) {
             assert(pkt->getSize() == blkSize);
             // special handling for coherent block requests from
@@ -153,6 +153,13 @@ Cache::satisfyRequest(PacketPtr pkt, CacheBlk *blk,
         }
     }
 }
+
+//AMHM Start
+void
+Cache::HWLogger(CacheBlk *blk) {
+    BaseCache::HWLogger(blk);
+}
+//AMHM End
 
 /////////////////////////////////////////////////////
 //

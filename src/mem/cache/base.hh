@@ -652,6 +652,10 @@ class BaseCache : public MemObject
     virtual void satisfyRequest(PacketPtr pkt, CacheBlk *blk,
                                 bool deferred_response = false,
                                 bool pending_downgrade = false);
+    
+    //AMHM Start
+    virtual void HWLogger(CacheBlk *blk);
+    //AMHM End
 
     /**
      * Maintain the clusivity of this cache by potentially
@@ -995,6 +999,62 @@ class BaseCache : public MemObject
 
     /** Number of replacements of valid blocks. */
     Stats::Scalar replacements;
+    
+    //AMHM Start
+    /* Calculating the Hamming weight of blocks written in the cache */
+    Stats::Scalar HWLessThan10;
+    Stats::Scalar HWLessThan20;
+    Stats::Scalar HWLessThan30;
+    Stats::Scalar HWLessThan40;
+    Stats::Scalar HWLessThan50;
+    Stats::Scalar HWLessThan60;
+    Stats::Scalar HWLessThan70;
+    Stats::Scalar HWLessThan80;
+    Stats::Scalar HWLessThan90;
+    Stats::Scalar HWLessThan100;
+    Stats::Scalar HWLessThan110;
+    Stats::Scalar HWLessThan120;
+    Stats::Scalar HWLessThan130;
+    Stats::Scalar HWLessThan140;
+    Stats::Scalar HWLessThan150;
+    Stats::Scalar HWLessThan160;
+    Stats::Scalar HWLessThan170;
+    Stats::Scalar HWLessThan180;
+    Stats::Scalar HWLessThan190;
+    Stats::Scalar HWLessThan200;
+    Stats::Scalar HWLessThan210;
+    Stats::Scalar HWLessThan220;
+    Stats::Scalar HWLessThan230;
+    Stats::Scalar HWLessThan240;
+    Stats::Scalar HWLessThan250;
+    Stats::Scalar HWLessThan260;
+    Stats::Scalar HWLessThan270;
+    Stats::Scalar HWLessThan280;
+    Stats::Scalar HWLessThan290;
+    Stats::Scalar HWLessThan300;
+    Stats::Scalar HWLessThan310;
+    Stats::Scalar HWLessThan320;
+    Stats::Scalar HWLessThan330;
+    Stats::Scalar HWLessThan340;
+    Stats::Scalar HWLessThan350;
+    Stats::Scalar HWLessThan360;
+    Stats::Scalar HWLessThan370;
+    Stats::Scalar HWLessThan380;
+    Stats::Scalar HWLessThan390;
+    Stats::Scalar HWLessThan400;
+    Stats::Scalar HWLessThan410;
+    Stats::Scalar HWLessThan420;
+    Stats::Scalar HWLessThan430;
+    Stats::Scalar HWLessThan440;
+    Stats::Scalar HWLessThan450;
+    Stats::Scalar HWLessThan460;
+    Stats::Scalar HWLessThan470;
+    Stats::Scalar HWLessThan480;
+    Stats::Scalar HWLessThan490;
+    Stats::Scalar HWLessThan500;
+    Stats::Scalar HWOver500; 
+    Stats::Scalar numberOfWriteOperations;
+    //AMHM End
 
     /**
      * @}

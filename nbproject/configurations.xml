@@ -1235,6 +1235,7 @@
               <in>bip_rp.cc</in>
               <in>brrip_rp.cc</in>
               <in>fifo_rp.cc</in>
+              <in>flexrel_rp.cc</in>
               <in>lfu_rp.cc</in>
               <in>lru_rp.cc</in>
               <in>mru_rp.cc</in>
@@ -8709,6 +8710,11 @@
             flavor2="0">
       </item>
       <item path="src/mem/cache/replacement_policies/fifo_rp.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/mem/cache/replacement_policies/flexrel_rp.cc"
             ex="false"
             tool="1"
             flavor2="0">

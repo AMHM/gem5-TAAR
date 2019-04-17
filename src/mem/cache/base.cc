@@ -467,8 +467,16 @@ BaseCache::recvTimingResp(PacketPtr pkt)
     // make sure that if the mshr was due to a whole line write then
     // the response is an invalidation
     assert(!mshr->wasWholeLineWrite || pkt->isInvalidate());
-
-    CacheBlk *blk = tags->findBlock(pkt->getAddr(), pkt->isSecure());
+    
+    //AMHM Start
+    CacheBlk *blk = nullptr;
+    if((pkt->getSize() == blkSize) && (pkt->isWrite()) && (pkt->hasData())){
+        uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+        pkt->writeDataToBlock(pkt_data, blkSize);
+        blk = tags->findBlock(pkt->getAddr(), pkt->isSecure(),HWCalculator(pkt_data),'w');
+    } else
+        blk = tags->findBlock(pkt->getAddr(), pkt->isSecure(),0,'r');
+    //AMHM End
 
     if (is_fill && !is_error) {
         DPRINTF(Cache, "Block for addr %#llx being updated in Cache\n",
@@ -628,7 +636,15 @@ BaseCache::functionalAccess(PacketPtr pkt, bool from_cpu_side)
 {
     Addr blk_addr = pkt->getBlockAddr(blkSize);
     bool is_secure = pkt->isSecure();
-    CacheBlk *blk = tags->findBlock(pkt->getAddr(), is_secure);
+    //AMHM Start
+    CacheBlk *blk = nullptr;
+    if((pkt->getSize() == blkSize) && (pkt->isWrite()) && (pkt->hasData())){
+        uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+        pkt->writeDataToBlock(pkt_data, blkSize);
+        blk = tags->findBlock(pkt->getAddr(), is_secure,HWCalculator(pkt_data),'w');
+    } else
+        blk = tags->findBlock(pkt->getAddr(), is_secure,0,'r');
+    //AMHM End
     MSHR *mshr = mshrQueue.findMatch(blk_addr, is_secure);
 
     pkt->pushLabel(name());
@@ -780,7 +796,8 @@ BaseCache::getNextQueueEntry()
         PacketPtr pkt = prefetcher->getPacket();
         if (pkt) {
             Addr pf_addr = pkt->getBlockAddr(blkSize);
-            if (!tags->findBlock(pf_addr, pkt->isSecure()) &&
+            //AMHM: We have not considered FlexRel for Pre fetching!
+            if (!tags->findBlock(pf_addr, pkt->isSecure(),0,'p') &&
                 !mshrQueue.findMatch(pf_addr, pkt->isSecure()) &&
                 !writeBuffer.findMatch(pf_addr, pkt->isSecure())) {
                 // Update statistic on number of prefetches issued
@@ -803,6 +820,18 @@ BaseCache::getNextQueueEntry()
 }
 
 //AMHM Start
+int
+BaseCache::HWCalculator(uint8_t *blk)
+{
+    uint8_t bitSet[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80};
+    int noOfones = 0;
+    for (int i = 0 ; i < blkSize ; i++)
+        for (int k = 0 ; k < 8; k++)
+            if (bitSet[k] & blk[i])
+                noOfones++;
+    return noOfones;
+}
+
 void
 BaseCache::HWLogger(CacheBlk* blk)
 {
@@ -1044,8 +1073,21 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
 
     // Access block in the tags
     Cycles tag_latency(0);
-    blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency);
-
+    
+    // AMHM Start
+    if(name()=="system.l2"){
+        if(((pkt->isWriteback() && !pkt->needsResponse()) || ((pkt->cmd == MemCmd::WriteClean) && !pkt->needsResponse()) || (pkt->isWrite()))
+                && (blkSize == pkt->getSize()) && (pkt->hasData()))
+        {
+            uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+            pkt->writeDataToBlock(pkt_data, blkSize);
+            blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency, HWCalculator(pkt_data),'w'); // A write packet is received            
+        }            
+        blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency, 0, 'r'); // A read packet is received   
+    } else
+    //AMHM End
+    blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency, 0, 'r');
+    
     // Calculate access latency
     lat = calculateAccessLatency(blk, tag_latency);
 
@@ -1118,7 +1160,11 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
 
         if (!blk) {
             // need to do a replacement
-            blk = allocateBlock(pkt, writebacks);
+            //AMHM Start
+            uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+            pkt->writeDataToBlock(pkt_data, blkSize);
+            blk = allocateBlock(pkt, writebacks, HWCalculator(pkt_data));
+            //AMHM End
             if (!blk) {
                 // no replaceable block available: give up, fwd to next level.
                 incMissCount(pkt);
@@ -1178,7 +1224,11 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                 return false;
             } else {
                 // a writeback that misses needs to allocate a new block
-                blk = allocateBlock(pkt, writebacks);
+                //AMHM Start
+                uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+                pkt->writeDataToBlock(pkt_data, blkSize);
+                blk = allocateBlock(pkt, writebacks, HWCalculator(pkt_data));
+                //AMHM End
                 if (!blk) {
                     // no replaceable block available: give up, fwd to
                     // next level.
@@ -1270,7 +1320,12 @@ BaseCache::handleFill(PacketPtr pkt, CacheBlk *blk, PacketList &writebacks,
 
         // need to do a replacement if allocating, otherwise we stick
         // with the temporary storage
-        blk = allocate ? allocateBlock(pkt, writebacks) : nullptr;
+        
+        //AMHM Start
+        uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+        pkt->writeDataToBlock(pkt_data, blkSize);
+        
+        blk = allocate ? allocateBlock(pkt, writebacks, HWCalculator(pkt_data)) : nullptr;
 
         if (!blk) {
             // No replaceable block or a mostly exclusive
@@ -1346,9 +1401,9 @@ BaseCache::handleFill(PacketPtr pkt, CacheBlk *blk, PacketList &writebacks,
 
     return blk;
 }
-
+//AMHM Start
 CacheBlk*
-BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
+BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks, int HW)
 {
     // Get address
     const Addr addr = pkt->getAddr();
@@ -1358,7 +1413,7 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
 
     // Find replacement victim
     std::vector<CacheBlk*> evict_blks;
-    CacheBlk *victim = tags->findVictim(addr, is_secure, evict_blks);
+    CacheBlk *victim = tags->findVictim(addr, is_secure, evict_blks, HW);
 
     // It is valid to return nullptr if there is no victim
     if (!victim)
@@ -1415,6 +1470,7 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
 
     return victim;
 }
+//AMHM End
 
 void
 BaseCache::invalidateBlock(CacheBlk *blk)
@@ -1629,7 +1685,7 @@ BaseCache::sendMSHRQueuePacket(MSHR* mshr)
         }
     }
 
-    CacheBlk *blk = tags->findBlock(mshr->blkAddr, mshr->isSecure);
+    CacheBlk *blk = tags->findBlock(mshr->blkAddr, mshr->isSecure, 0,'r');
 
     // either a prefetch that is not present upstream, or a normal
     // MSHR request, proceed to get the packet to send downstream

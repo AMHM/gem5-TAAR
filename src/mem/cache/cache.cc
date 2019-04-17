@@ -182,7 +182,7 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         DPRINTF(Cache, "%s for %s\n", __func__, pkt->print());
 
         // flush and invalidate any existing block
-        CacheBlk *old_blk(tags->findBlock(pkt->getAddr(), pkt->isSecure()));
+        CacheBlk *old_blk(tags->findBlock(pkt->getAddr(), pkt->isSecure(),0,'r'));
         if (old_blk && old_blk->isValid()) {
             BaseCache::evictBlock(old_blk, writebacks);
         }
@@ -1166,8 +1166,17 @@ Cache::recvTimingSnoopReq(PacketPtr pkt)
     }
 
     bool is_secure = pkt->isSecure();
-    CacheBlk *blk = tags->findBlock(pkt->getAddr(), is_secure);
-
+    
+    //AMHM Start
+    CacheBlk *blk = nullptr;
+    if((pkt->getSize() == blkSize) && (pkt->isWrite())&& (pkt->hasData())){
+        uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+        pkt->writeDataToBlock(pkt_data, blkSize);
+        blk = tags->findBlock(pkt->getAddr(), is_secure,HWCalculator(pkt_data),'w');
+    } else
+        blk = tags->findBlock(pkt->getAddr(), is_secure,0,'r');
+    //AMHM End
+    
     Addr blk_addr = pkt->getBlockAddr(blkSize);
     MSHR *mshr = mshrQueue.findMatch(blk_addr, is_secure);
 
@@ -1287,8 +1296,17 @@ Cache::recvAtomicSnoop(PacketPtr pkt)
     if (!inRange(pkt->getAddr())) {
         return 0;
     }
+    
+    //AMHM Start
+    CacheBlk *blk = nullptr;
+    if((pkt->getSize() == blkSize) && (pkt->isWrite()) && (pkt->hasData())){
+        uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
+        pkt->writeDataToBlock(pkt_data, blkSize);
+        blk = tags->findBlock(pkt->getAddr(), pkt->isSecure(),HWCalculator(pkt_data),'w');
+    } else
+        blk = tags->findBlock(pkt->getAddr(), pkt->isSecure(),0,'r');
+    //AMHM End
 
-    CacheBlk *blk = tags->findBlock(pkt->getAddr(), pkt->isSecure());
     uint32_t snoop_delay = handleSnoop(pkt, blk, false, false, false);
     return snoop_delay + lookupLatency * clockPeriod();
 }
@@ -1334,7 +1352,7 @@ Cache::sendMSHRQueuePacket(MSHR* mshr)
 
         // we should never have hardware prefetches to allocated
         // blocks
-        assert(!tags->findBlock(mshr->blkAddr, mshr->isSecure));
+        assert(!tags->findBlock(mshr->blkAddr, mshr->isSecure,0,'r')); //AMHM: We have not considered FlexRel for Pre fetching!
 
         // We need to check the caches above us to verify that
         // they don't have a copy of this block in the dirty state

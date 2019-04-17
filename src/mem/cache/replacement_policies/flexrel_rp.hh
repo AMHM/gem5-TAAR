@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors: Daniel Carvalho
+ * Authors: Amir Mahdi Hosseini Monazzah
  */
 
 /**
@@ -34,18 +34,18 @@
  * The victim is chosen using the last touch timestamp.
  */
 
-#ifndef __MEM_CACHE_REPLACEMENT_POLICIES_LRU_RP_HH__
-#define __MEM_CACHE_REPLACEMENT_POLICIES_LRU_RP_HH__
+#ifndef __MEM_CACHE_REPLACEMENT_POLICIES_FLEXREL_RP_HH__
+#define __MEM_CACHE_REPLACEMENT_POLICIES_FLEXREL_RP_HH__
 
 #include "mem/cache/replacement_policies/base.hh"
 
-struct LRURPParams;
+struct FLEXRELRPParams;
 
-class LRURP : public BaseReplacementPolicy
+class FLEXRELRP : public BaseReplacementPolicy
 {
   protected:
-    /** LRU-specific implementation of replacement data. */
-    struct LRUReplData : ReplacementData
+    /** FLEXREL-specific implementation of replacement data. */
+    struct FLEXRELReplData : ReplacementData
     {
         /** Tick on which the entry was last touched. */
         Tick lastTouchTick;
@@ -53,22 +53,22 @@ class LRURP : public BaseReplacementPolicy
         /**
          * Default constructor. Invalidate data.
          */
-        LRUReplData() : lastTouchTick(0) {}
+        FLEXRELReplData() : lastTouchTick(0) {}
     };
 
   public:
     /** Convenience typedef. */
-    typedef LRURPParams Params;
+    typedef FLEXRELRPParams Params;
 
     /**
      * Construct and initiliaze this replacement policy.
      */
-    LRURP(const Params *p);
+    FLEXRELRP(const Params *p);
 
     /**
      * Destructor.
      */
-    ~LRURP() {}
+    ~FLEXRELRP() {}
 
     /**
      * Invalidate replacement data to set it as the next probable victim.
@@ -98,7 +98,7 @@ class LRURP : public BaseReplacementPolicy
                                                                      override;
 
     /**
-     * Find replacement victim using LRU timestamps.
+     * Find replacement victim using FLEXREL timestamps.
      *
      * @param candidates Replacement candidates, selected by indexing policy.
      * @return Replacement entry to be replaced.
@@ -114,4 +114,4 @@ class LRURP : public BaseReplacementPolicy
     std::shared_ptr<ReplacementData> instantiateEntry() override;
 };
 
-#endif // __MEM_CACHE_REPLACEMENT_POLICIES_LRU_RP_HH__
+#endif // __MEM_CACHE_REPLACEMENT_POLICIES_FLEXREL_RP_HH__

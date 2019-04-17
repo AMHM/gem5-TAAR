@@ -187,12 +187,12 @@ class FALRU : public BaseTags
      * @return Pointer to the cache block.
      */
     CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat,
-                          CachesMask *in_cache_mask);
+                          CachesMask *in_cache_mask, int HW, char command);
 
     /**
      * Just a wrapper of above function to conform with the base interface.
      */
-    CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat) override;
+    CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat, int HW, char command) override;
 
     /**
      * Find the block in the cache, do not update the replacement data.
@@ -201,7 +201,7 @@ class FALRU : public BaseTags
      * @param asid The address space ID.
      * @return Pointer to the cache block.
      */
-    CacheBlk* findBlock(Addr addr, bool is_secure) const override;
+    CacheBlk* findBlock(Addr addr, bool is_secure, int HW, char command) const override;
 
     /**
      * Find a block given set and way.
@@ -222,7 +222,7 @@ class FALRU : public BaseTags
      * @return Cache block to be replaced.
      */
     CacheBlk* findVictim(Addr addr, const bool is_secure,
-                         std::vector<CacheBlk*>& evict_blks) const override;
+                         std::vector<CacheBlk*>& evict_blks, int HW) const override;
 
     /**
      * Insert the new block into the cache and update replacement data.

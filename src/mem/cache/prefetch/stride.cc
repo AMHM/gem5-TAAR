@@ -239,7 +239,7 @@ StridePrefetcher::PCTable::findVictim(Addr pc)
 
     // Choose victim based on replacement policy
     StrideEntry* victim = static_cast<StrideEntry*>(
-        replacementPolicy->getVictim(possible_entries));
+        replacementPolicy->getVictim(possible_entries,0)); //We have not implemented FlexRel on prefetching
 
     DPRINTF(HWPrefetch, "Victimizing lookup table[%d][%d].\n",
             victim->getSet(), victim->getWay());

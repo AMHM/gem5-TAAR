@@ -75,22 +75,65 @@ BaseTags::findBlockBySetAndWay(int set, int way) const
 }
 
 CacheBlk*
-BaseTags::findBlock(Addr addr, bool is_secure) const
+BaseTags::findBlock(Addr addr, bool is_secure, int HW, char command) const
 {
-    // Extract block tag
-    Addr tag = extractTag(addr);
+    //AMHM Start
+    
+    /*The layout of considered 16-way set associative cache is as follow
+     * |HW less than 100: Way 0, way 1, way 2 and way 3                                         |
+     * |HW between 101 and 250: way 4, way 5, way 6, way 7, way 8, way 9, way 10, and way 11    |
+     * |HW between 251 and 400: way 12 and way 13                                               |
+     * |HW over 401: way 14 and way 15                                                          |    
+    */
+    if(name()=="system.l2.tags"){
+        //assert(assoc == 16); FlexRel is only implemented for 16-way set associative configurations!
+        // Extract block tag
+        Addr tag = extractTag(addr);
+        
+        bool found = 0;
+        CacheBlk* blk = nullptr;
+        
+        // Find possible entries that may contain the given address
+        const std::vector<ReplaceableEntry*> entries =
+            indexingPolicy->getPossibleEntries(addr);
 
-    // Find possible entries that may contain the given address
-    const std::vector<ReplaceableEntry*> entries =
-        indexingPolicy->getPossibleEntries(addr);
-
-    // Search for block
-    for (const auto& location : entries) {
-        CacheBlk* blk = static_cast<CacheBlk*>(location);
-        if ((blk->tag == tag) && blk->isValid() &&
-            (blk->isSecure() == is_secure)) {
+        for (const auto& location : entries) {
+            blk = static_cast<CacheBlk*>(location);
+            if ((blk->tag == tag) && blk->isValid() &&
+                (blk->isSecure() == is_secure)) {
+                found = 1;
+                break;
+            }
+      }
+        if ((found == 1) && (command == 'w')) {
+            int way = blk->getWay();
+            if((HW < 100) && (way < 4)) {return blk;} else
+            if((HW >= 101) && (HW <= 250) && (way >= 4) && (way < 12)) {return blk;} else
+            if((HW >= 251) && (HW <= 400) && (way >= 12) && (way < 14)) {return blk;} else
+            if((HW >= 401) && (way >= 14) && (way < 16)) {return blk;} else {
+                blk->invalidate();                
+                return nullptr;}
+        } else if (found) {
             return blk;
-        }
+        } else
+            return nullptr;
+          
+    } else{
+        // Extract block tag
+        Addr tag = extractTag(addr);
+
+        // Find possible entries that may contain the given address
+        const std::vector<ReplaceableEntry*> entries =
+            indexingPolicy->getPossibleEntries(addr);
+
+        // Search for block
+        for (const auto& location : entries) {
+            CacheBlk* blk = static_cast<CacheBlk*>(location);
+            if ((blk->tag == tag) && blk->isValid() &&
+                (blk->isSecure() == is_secure)) {
+                return blk;
+            }
+      } 
     }
 
     // Did not find block
@@ -286,6 +329,168 @@ BaseTags::regStats()
         .name(name() + ".data_accesses")
         .desc("Number of data accesses")
         ;
+    
+    //AMHM Start
+    numberOfReadWay0
+        .name(name() + ".numberOfReadWay0")
+        .desc("AMHM: Number of read operations in way 0")
+        ;
+    
+    numberOfReadWay1
+        .name(name() + ".numberOfReadWay1")
+        .desc("AMHM: Number of read operations in way 1")
+        ;
+    
+    numberOfReadWay2
+        .name(name() + ".numberOfReadWay2")
+        .desc("AMHM: Number of read operations in way 2")
+        ;
+    
+    numberOfReadWay3
+        .name(name() + ".numberOfReadWay3")
+        .desc("AMHM: Number of read operations in way 3")
+        ;
+    
+    numberOfReadWay4
+        .name(name() + ".numberOfReadWay4")
+        .desc("AMHM: Number of read operations in way 4")
+        ;
+    
+    numberOfReadWay5
+        .name(name() + ".numberOfReadWay5")
+        .desc("AMHM: Number of read operations in way 5")
+        ;
+    
+    numberOfReadWay6
+        .name(name() + ".numberOfReadWay6")
+        .desc("AMHM: Number of read operations in way 6")
+        ;
+    
+    numberOfReadWay7
+        .name(name() + ".numberOfReadWay7")
+        .desc("AMHM: Number of read operations in way 7")
+        ;
+    
+    numberOfReadWay8
+        .name(name() + ".numberOfReadWay8")
+        .desc("AMHM: Number of read operations in way 8")
+        ;
+    
+    numberOfReadWay9
+        .name(name() + ".numberOfReadWay9")
+        .desc("AMHM: Number of read operations in way 9")
+        ;
+    
+    numberOfReadWay10
+        .name(name() + ".numberOfReadWay10")
+        .desc("AMHM: Number of read operations in way 10")
+        ;
+    
+    numberOfReadWay11
+        .name(name() + ".numberOfReadWay11")
+        .desc("AMHM: Number of read operations in way 11")
+        ;
+    
+    numberOfReadWay12
+        .name(name() + ".numberOfReadWay12")
+        .desc("AMHM: Number of read operations in way 12")
+        ;
+    
+    numberOfReadWay13
+        .name(name() + ".numberOfReadWay13")
+        .desc("AMHM: Number of read operations in way 13")
+        ;
+    
+    numberOfReadWay14
+        .name(name() + ".numberOfReadWay14")
+        .desc("AMHM: Number of read operations in way 14")
+        ;
+    
+    numberOfReadWay15
+        .name(name() + ".numberOfReadWay15")
+        .desc("AMHM: Number of read operations in way 15")
+        ;
+    
+    numberOfWriteWay0
+        .name(name() + ".numberOfWriteWay0")
+        .desc("AMHM: Number of write operations in way 0")
+        ;
+    
+    numberOfWriteWay1
+        .name(name() + ".numberOfWriteWay1")
+        .desc("AMHM: Number of write operations in way 1")
+        ;
+    
+    numberOfWriteWay2
+        .name(name() + ".numberOfWriteWay2")
+        .desc("AMHM: Number of write operations in way 2")
+        ;
+    
+    numberOfWriteWay3
+        .name(name() + ".numberOfWriteWay3")
+        .desc("AMHM: Number of write operations in way 3")
+        ;
+    
+    numberOfWriteWay4
+        .name(name() + ".numberOfWriteWay4")
+        .desc("AMHM: Number of write operations in way 4")
+        ;
+    
+    numberOfWriteWay5
+        .name(name() + ".numberOfWriteWay5")
+        .desc("AMHM: Number of write operations in way 5")
+        ;
+    
+    numberOfWriteWay6
+        .name(name() + ".numberOfWriteWay6")
+        .desc("AMHM: Number of write operations in way 6")
+        ;
+    
+    numberOfWriteWay7
+        .name(name() + ".numberOfWriteWay7")
+        .desc("AMHM: Number of write operations in way 7")
+        ;
+    
+    numberOfWriteWay8
+        .name(name() + ".numberOfWriteWay8")
+        .desc("AMHM: Number of write operations in way 8")
+        ;
+    
+    numberOfWriteWay9
+        .name(name() + ".numberOfWriteWay9")
+        .desc("AMHM: Number of write operations in way 9")
+        ;
+    
+    numberOfWriteWay10
+        .name(name() + ".numberOfWriteWay10")
+        .desc("AMHM: Number of write operations in way 10")
+        ;
+    
+    numberOfWriteWay11
+        .name(name() + ".numberOfWriteWay11")
+        .desc("AMHM: Number of write operations in way 11")
+        ;
+    
+    numberOfWriteWay12
+        .name(name() + ".numberOfWriteWay12")
+        .desc("AMHM: Number of write operations in way 12")
+        ;
+    
+    numberOfWriteWay13
+        .name(name() + ".numberOfWriteWay13")
+        .desc("AMHM: Number of write operations in way 13")
+        ;
+    
+    numberOfWriteWay14
+        .name(name() + ".numberOfWriteWay14")
+        .desc("AMHM: Number of write operations in way 14")
+        ;
+    
+    numberOfWriteWay15
+        .name(name() + ".numberOfWriteWay15")
+        .desc("AMHM: Number of write operations in way 15")
+        ;
+    //AMHM End
 
     registerDumpCallback(new BaseTagsDumpCallback(this));
     registerExitCallback(new BaseTagsCallback(this));

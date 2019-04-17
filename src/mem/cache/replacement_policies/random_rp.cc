@@ -64,7 +64,7 @@ RandomRP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
 }
 
 ReplaceableEntry*
-RandomRP::getVictim(const ReplacementCandidates& candidates) const
+RandomRP::getVictim(const ReplacementCandidates& candidates, int HW) const
 {
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);

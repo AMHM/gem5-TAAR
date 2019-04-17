@@ -130,9 +130,9 @@ SectorTags::invalidate(CacheBlk *blk)
 }
 
 CacheBlk*
-SectorTags::accessBlock(Addr addr, bool is_secure, Cycles &lat)
+SectorTags::accessBlock(Addr addr, bool is_secure, Cycles &lat, int HW, char command)
 {
-    CacheBlk *blk = findBlock(addr, is_secure);
+    CacheBlk *blk = findBlock(addr, is_secure, HW, command);
 
     // Access all tags in parallel, hence one in each way.  The data side
     // either accesses all blocks in parallel, or one block sequentially on
@@ -193,7 +193,7 @@ SectorTags::insertBlock(const Addr addr, const bool is_secure,
 }
 
 CacheBlk*
-SectorTags::findBlock(Addr addr, bool is_secure) const
+SectorTags::findBlock(Addr addr, bool is_secure, int HW, char command) const
 {
     // Extract sector tag
     const Addr tag = extractTag(addr);
@@ -221,7 +221,7 @@ SectorTags::findBlock(Addr addr, bool is_secure) const
 
 CacheBlk*
 SectorTags::findVictim(Addr addr, const bool is_secure,
-                       std::vector<CacheBlk*>& evict_blks) const
+                       std::vector<CacheBlk*>& evict_blks, int HW) const
 {
     // Get possible entries to be victimized
     const std::vector<ReplaceableEntry*> sector_entries =
@@ -243,7 +243,7 @@ SectorTags::findVictim(Addr addr, const bool is_secure,
     if (victim_sector == nullptr){
         // Choose replacement victim from replacement candidates
         victim_sector = static_cast<SectorBlk*>(replacementPolicy->getVictim(
-                                                sector_entries));
+                                                sector_entries,HW));
     }
 
     // Get the entry of the victim block within the sector

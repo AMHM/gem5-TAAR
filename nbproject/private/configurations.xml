@@ -1254,6 +1254,8 @@
                 <in>brrip_rp.hh</in>
                 <in>fifo_rp.cc</in>
                 <in>fifo_rp.hh</in>
+                <in>flexrel_rp.cc</in>
+                <in>flexrel_rp.hh</in>
                 <in>lfu_rp.cc</in>
                 <in>lfu_rp.hh</in>
                 <in>lru_rp.cc</in>
@@ -1852,6 +1854,7 @@
             <in>ExternalSlave.hh</in>
             <in>FALRU.hh</in>
             <in>FIFORP.hh</in>
+            <in>FLEXRELRP.hh</in>
             <in>FUDesc.hh</in>
             <in>FUPool.hh</in>
             <in>FaultModel.hh</in>
@@ -2144,6 +2147,7 @@
               <in>param_ExternalSlave.cc</in>
               <in>param_FALRU.cc</in>
               <in>param_FIFORP.cc</in>
+              <in>param_FLEXRELRP.cc</in>
               <in>param_FUDesc.cc</in>
               <in>param_FUPool.cc</in>
               <in>param_FaultModel.cc</in>
@@ -5659,6 +5663,8 @@
               <in>brrip_rp.hh</in>
               <in>fifo_rp.cc</in>
               <in>fifo_rp.hh</in>
+              <in>flexrel_rp.cc</in>
+              <in>flexrel_rp.hh</in>
               <in>lfu_rp.cc</in>
               <in>lfu_rp.hh</in>
               <in>lru_rp.cc</in>

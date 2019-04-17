@@ -148,6 +148,44 @@ class BaseTags : public ClockedObject
     Stats::Scalar tagAccesses;
     /** Number of data blocks consulted over all accesses. */
     Stats::Scalar dataAccesses;
+    
+    //AMHM Start
+    //Calculating number of reads operations in each way of the cache
+    Stats::Scalar numberOfReadWay0;
+    Stats::Scalar numberOfReadWay1;
+    Stats::Scalar numberOfReadWay2;
+    Stats::Scalar numberOfReadWay3;
+    Stats::Scalar numberOfReadWay4;
+    Stats::Scalar numberOfReadWay5;
+    Stats::Scalar numberOfReadWay6;
+    Stats::Scalar numberOfReadWay7;
+    Stats::Scalar numberOfReadWay8;
+    Stats::Scalar numberOfReadWay9;
+    Stats::Scalar numberOfReadWay10;
+    Stats::Scalar numberOfReadWay11;
+    Stats::Scalar numberOfReadWay12;
+    Stats::Scalar numberOfReadWay13;
+    Stats::Scalar numberOfReadWay14;
+    Stats::Scalar numberOfReadWay15;
+    
+    //Calculating number of writes operations in each way of the cache
+    Stats::Scalar numberOfWriteWay0;
+    Stats::Scalar numberOfWriteWay1;
+    Stats::Scalar numberOfWriteWay2;
+    Stats::Scalar numberOfWriteWay3;
+    Stats::Scalar numberOfWriteWay4;
+    Stats::Scalar numberOfWriteWay5;
+    Stats::Scalar numberOfWriteWay6;
+    Stats::Scalar numberOfWriteWay7;
+    Stats::Scalar numberOfWriteWay8;
+    Stats::Scalar numberOfWriteWay9;
+    Stats::Scalar numberOfWriteWay10;
+    Stats::Scalar numberOfWriteWay11;
+    Stats::Scalar numberOfWriteWay12;
+    Stats::Scalar numberOfWriteWay13;
+    Stats::Scalar numberOfWriteWay14;
+    Stats::Scalar numberOfWriteWay15;    
+    //AMHM End
 
     /**
      * @}
@@ -197,7 +235,7 @@ class BaseTags : public ClockedObject
      * @param is_secure True if the target memory space is secure.
      * @return Pointer to the cache block.
      */
-    virtual CacheBlk *findBlock(Addr addr, bool is_secure) const;
+    virtual CacheBlk *findBlock(Addr addr, bool is_secure, int HW, char command) const;
 
     /**
      * Find a block given set and way.
@@ -279,7 +317,7 @@ class BaseTags : public ClockedObject
      * @return Cache block to be replaced.
      */
     virtual CacheBlk* findVictim(Addr addr, const bool is_secure,
-                                 std::vector<CacheBlk*>& evict_blks) const = 0;
+                                 std::vector<CacheBlk*>& evict_blks, int HW) const = 0;
 
     /**
      * Access block and update replacement data. May not succeed, in which case
@@ -292,7 +330,7 @@ class BaseTags : public ClockedObject
      * @param lat The latency of the tag lookup.
      * @return Pointer to the cache block if found.
      */
-    virtual CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat) = 0;
+    virtual CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat, int HW, char command) = 0;
 
     /**
      * Generate the tag from the given address.

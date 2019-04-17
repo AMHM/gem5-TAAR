@@ -654,6 +654,7 @@ class BaseCache : public MemObject
                                 bool pending_downgrade = false);
     
     //AMHM Start
+    virtual int HWCalculator(uint8_t *blk);
     virtual void HWLogger(CacheBlk *blk);
     //AMHM End
 
@@ -701,7 +702,9 @@ class BaseCache : public MemObject
      * @param writebacks A list of writeback packets for the evicted blocks
      * @return the allocated block
      */
-    CacheBlk *allocateBlock(const PacketPtr pkt, PacketList &writebacks);
+    //AMHM Start
+    CacheBlk *allocateBlock(const PacketPtr pkt, PacketList &writebacks, int HW);
+    //AMHM End
     /**
      * Evict a cache block.
      *
@@ -1188,8 +1191,8 @@ class BaseCache : public MemObject
         memSidePort.schedSendEvent(time);
     }
 
-    bool inCache(Addr addr, bool is_secure) const {
-        return tags->findBlock(addr, is_secure);
+    bool inCache(Addr addr, bool is_secure, int HW, char command) const {
+        return tags->findBlock(addr, is_secure, HW, command);
     }
 
     bool inMissQueue(Addr addr, bool is_secure) const {

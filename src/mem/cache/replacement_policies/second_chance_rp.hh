@@ -121,7 +121,7 @@ class SecondChanceRP : public FIFORP
      * @param cands Replacement candidates, selected by indexing policy.
      * @return Replacement entry to be replaced.
      */
-    ReplaceableEntry* getVictim(const ReplacementCandidates& candidates) const
+    ReplaceableEntry* getVictim(const ReplacementCandidates& candidates, int HW) const
                                                                      override;
 
     /**

@@ -82,7 +82,7 @@ SecondChanceRP::reset(const std::shared_ptr<ReplacementData>& replacement_data) 
 }
 
 ReplaceableEntry*
-SecondChanceRP::getVictim(const ReplacementCandidates& candidates) const
+SecondChanceRP::getVictim(const ReplacementCandidates& candidates, int HW) const
 {
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);
@@ -106,7 +106,7 @@ SecondChanceRP::getVictim(const ReplacementCandidates& candidates) const
     bool search_victim = true;
     while (search_victim) {
         // Do a FIFO victim search
-        victim = FIFORP::getVictim(candidates);
+        victim = FIFORP::getVictim(candidates,0);
 
         // Cast victim's replacement data for code readability
         std::shared_ptr<SecondChanceReplData> victim_replacement_data =

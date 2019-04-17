@@ -166,7 +166,7 @@ const
 }
 
 ReplaceableEntry*
-TreePLRURP::getVictim(const ReplacementCandidates& candidates) const
+TreePLRURP::getVictim(const ReplacementCandidates& candidates, int HW) const
 {
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);

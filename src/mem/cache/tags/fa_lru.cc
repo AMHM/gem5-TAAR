@@ -138,17 +138,17 @@ FALRU::invalidate(CacheBlk *blk)
 }
 
 CacheBlk*
-FALRU::accessBlock(Addr addr, bool is_secure, Cycles &lat)
+FALRU::accessBlock(Addr addr, bool is_secure, Cycles &lat, int HW, char command)
 {
-    return accessBlock(addr, is_secure, lat, 0);
+    return accessBlock(addr, is_secure, lat, HW, command);
 }
 
 CacheBlk*
 FALRU::accessBlock(Addr addr, bool is_secure, Cycles &lat,
-                   CachesMask *in_caches_mask)
+                   CachesMask *in_caches_mask, int HW, char command)
 {
     CachesMask mask = 0;
-    FALRUBlk* blk = static_cast<FALRUBlk*>(findBlock(addr, is_secure));
+    FALRUBlk* blk = static_cast<FALRUBlk*>(findBlock(addr, is_secure, HW, command));
 
     // If a cache hit
     if (blk && blk->isValid()) {
@@ -170,7 +170,7 @@ FALRU::accessBlock(Addr addr, bool is_secure, Cycles &lat,
 }
 
 CacheBlk*
-FALRU::findBlock(Addr addr, bool is_secure) const
+FALRU::findBlock(Addr addr, bool is_secure, int HW, char command) const
 {
     FALRUBlk* blk = nullptr;
 
@@ -197,7 +197,7 @@ FALRU::findBlockBySetAndWay(int set, int way) const
 
 CacheBlk*
 FALRU::findVictim(Addr addr, const bool is_secure,
-                  std::vector<CacheBlk*>& evict_blks) const
+                  std::vector<CacheBlk*>& evict_blks, int HW) const
 {
     // The victim is always stored on the tail for the FALRU
     FALRUBlk* victim = tail;

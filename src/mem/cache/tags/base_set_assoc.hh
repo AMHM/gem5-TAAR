@@ -122,9 +122,88 @@ class BaseSetAssoc : public BaseTags
      * @param lat The latency of the tag lookup.
      * @return Pointer to the cache block if found.
      */
-    CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat) override
+    CacheBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat, int HW, char command) override
     {
-        CacheBlk *blk = findBlock(addr, is_secure);
+        CacheBlk *blk = findBlock(addr, is_secure, HW, command);
+        
+        // AMHM Start
+        // Counting the number of reads or writes in the ways of the cache
+        if (blk != nullptr){
+            if (command == 'r'){
+                switch (blk->getWay()) {
+                    case 0 : numberOfReadWay0++;
+                             break;
+                    case 1 : numberOfReadWay1++;
+                             break;
+                    case 2 : numberOfReadWay2++;
+                             break;
+                    case 3 : numberOfReadWay3++;
+                             break;
+                    case 4 : numberOfReadWay4++;
+                             break;   
+                    case 5 : numberOfReadWay5++;
+                             break;
+                    case 6 : numberOfReadWay6++;
+                             break;
+                    case 7 : numberOfReadWay7++;
+                             break;
+                    case 8 : numberOfReadWay8++;
+                             break;
+                    case 9 : numberOfReadWay9++;
+                             break;
+                    case 10 : numberOfReadWay10++;
+                             break;
+                    case 11 : numberOfReadWay11++;
+                             break;
+                    case 12 : numberOfReadWay12++;
+                             break;
+                    case 13 : numberOfReadWay13++;
+                             break;
+                    case 14 : numberOfReadWay14++;
+                             break;
+                    case 15 : numberOfReadWay15++;
+                             break;
+                    default : break;
+                }
+            } else if (command == 'w'){
+                switch (blk->getWay()) {
+                    case 0 : numberOfWriteWay0++;
+                             break;
+                    case 1 : numberOfWriteWay1++;
+                             break;
+                    case 2 : numberOfWriteWay2++;
+                             break;
+                    case 3 : numberOfWriteWay3++;
+                             break;
+                    case 4 : numberOfWriteWay4++;
+                             break;   
+                    case 5 : numberOfWriteWay5++;
+                             break;
+                    case 6 : numberOfWriteWay6++;
+                             break;
+                    case 7 : numberOfWriteWay7++;
+                             break;
+                    case 8 : numberOfWriteWay8++;
+                             break;
+                    case 9 : numberOfWriteWay9++;
+                             break;
+                    case 10 : numberOfWriteWay10++;
+                             break;
+                    case 11 : numberOfWriteWay11++;
+                             break;
+                    case 12 : numberOfWriteWay12++;
+                             break;
+                    case 13 : numberOfWriteWay13++;
+                             break;
+                    case 14 : numberOfWriteWay14++;
+                             break;
+                    case 15 : numberOfWriteWay15++;
+                             break;
+                    default : break;
+                }
+            }
+        }
+        // AMHM End
 
         // Access all tags in parallel, hence one in each way.  The data side
         // either accesses all blocks in parallel, or one block sequentially on
@@ -163,7 +242,7 @@ class BaseSetAssoc : public BaseTags
      * @return Cache block to be replaced.
      */
     CacheBlk* findVictim(Addr addr, const bool is_secure,
-                         std::vector<CacheBlk*>& evict_blks) const override
+                         std::vector<CacheBlk*>& evict_blks, int HW) const override
     {
         // Get possible entries to be victimized
         const std::vector<ReplaceableEntry*> entries =
@@ -171,7 +250,7 @@ class BaseSetAssoc : public BaseTags
 
         // Choose replacement victim from replacement candidates
         CacheBlk* victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(
-                                entries));
+                                entries,HW));
 
         // There is only one eviction for this replacement
         evict_blks.push_back(victim);

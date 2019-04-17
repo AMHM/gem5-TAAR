@@ -136,7 +136,7 @@ BasePrefetcher::observeAccess(const PacketPtr &pkt) const
 bool
 BasePrefetcher::inCache(Addr addr, bool is_secure) const
 {
-    return cache->inCache(addr, is_secure);
+    return cache->inCache(addr, is_secure, 0, 'p'); //AMHM: We have not considered FlexRel in Pre fetching!!!
 }
 
 bool

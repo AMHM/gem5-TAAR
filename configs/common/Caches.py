@@ -59,8 +59,10 @@ class L1_ICache(L1Cache):
     is_read_only = True
     # Writeback clean lines as well
     writeback_clean = True
+    replacement_policy = Param.BaseReplacementPolicy(LRURP(), "LRU Replacement policy")
 
 class L1_DCache(L1Cache):
+    replacement_policy = Param.BaseReplacementPolicy(LRURP(), "LRU Replacement policy")
     pass
 
 class L2Cache(Cache):
@@ -71,6 +73,9 @@ class L2Cache(Cache):
     mshrs = 20
     tgts_per_mshr = 12
     write_buffers = 8
+    #AMHM Start
+    replacement_policy = Param.BaseReplacementPolicy(FLEXRELRP(), "FLEXREL Replacement policy")
+    #AMHM End
 
 class IOCache(Cache):
     assoc = 8

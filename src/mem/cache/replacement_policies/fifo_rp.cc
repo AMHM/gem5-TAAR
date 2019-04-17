@@ -64,7 +64,7 @@ FIFORP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
 }
 
 ReplaceableEntry*
-FIFORP::getVictim(const ReplacementCandidates& candidates) const
+FIFORP::getVictim(const ReplacementCandidates& candidates, int HW) const
 {
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);

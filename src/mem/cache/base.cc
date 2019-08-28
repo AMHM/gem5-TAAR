@@ -474,6 +474,8 @@ BaseCache::recvTimingResp(PacketPtr pkt)
         uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
         pkt->writeDataToBlock(pkt_data, blkSize);
         blk = tags->findBlock(pkt->getAddr(), pkt->isSecure(),HWCalculator(pkt_data),'w');
+        if(blk != NULL)
+            accessRatioLogger(blk,pkt);
     } else
         blk = tags->findBlock(pkt->getAddr(), pkt->isSecure(),0,'r');
     //AMHM End
@@ -642,6 +644,8 @@ BaseCache::functionalAccess(PacketPtr pkt, bool from_cpu_side)
         uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
         pkt->writeDataToBlock(pkt_data, blkSize);
         blk = tags->findBlock(pkt->getAddr(), is_secure,HWCalculator(pkt_data),'w');
+        if(blk != NULL)
+            accessRatioLogger(blk,pkt);
     } else
         blk = tags->findBlock(pkt->getAddr(), is_secure,0,'r');
     //AMHM End
@@ -945,6 +949,51 @@ BaseCache::HWLogger(CacheBlk* blk)
     else
         HWOver500++;    
 }
+
+void
+BaseCache::accessRatioLogger(CacheBlk *blk, PacketPtr recivedPacket)
+{
+    uint8_t bitSet[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80};
+    uint8_t xorArray[blkSize];
+    
+    uint8_t newData[blkSize], oldData[blkSize];
+    
+    // Iinitialization
+    for (int i = 0; i < blkSize; i++){
+            newData[i] = 0;
+            oldData[i] = 0;			
+    }
+    recivedPacket->writeDataToBlock(newData, blkSize);
+    std::memcpy(oldData, blk->data, blkSize);
+    
+    for (int i = 0; i < blkSize; i++)
+        xorArray[i] = newData[i] ^ oldData[i];
+    for (int i = 0 ; i < blkSize ; i++)
+        for (int k = 0 ; k < 8; k++)
+            if (bitSet[k] & xorArray[i])
+            {
+                if(blk->bitLevelLastTouch[(i*8)+k] != (curTick() / SimClock::Int::ns)) {
+                    tags->averageBitToggleRatio[(i*8)+k] = ((tags->averageBitToggleRatio[(i*8)+k].value()*blk->bitLevelTouchOccurance[(i*8)+k])
+                            + ((curTick() /  SimClock::Int::ns) - blk->bitLevelLastTouch[(i*8)+k])) / (blk->bitLevelTouchOccurance[(i*8)+k] + 1);
+                    if( tags->maxBitToggleRatio[(i*8)+k].value() < ((curTick() / SimClock::Int::ns) - blk->bitLevelLastTouch[(i*8)+k]))
+                        tags->maxBitToggleRatio[(i*8)+k] = ((curTick() / SimClock::Int::ns) - blk->bitLevelLastTouch[(i*8)+k]);
+                    if((tags->minBitToggleRatio[(i*8)+k].value() == 0) || (tags->minBitToggleRatio[(i*8)+k].value() > ((curTick() / SimClock::Int::ns) - blk->bitLevelLastTouch[(i*8)+k])))
+                        tags->minBitToggleRatio[(i*8)+k] = (curTick() / SimClock::Int::ns) - blk->bitLevelLastTouch[(i*8)+k];
+                    blk->bitLevelLastTouch[(i*8)+k] = curTick() / SimClock::Int::ns;
+                    blk->bitLevelTouchOccurance[(i*8)+k]++; 
+                }
+            }
+    if(blk->blockLevelLastTouch != (curTick() / SimClock::Int::ns)) {
+        tags->averageBlockToggleRatio = ((tags->averageBlockToggleRatio.value() * blk->blockLevelTouchOccurance) 
+                            + ((curTick() / SimClock::Int::ns) - blk->blockLevelLastTouch)) / (blk->blockLevelTouchOccurance + 1);
+        if(tags->maxBlockToggleRatio.value() < ((curTick() / SimClock::Int::ns) - blk->blockLevelLastTouch))
+                        tags->maxBlockToggleRatio = (curTick() / SimClock::Int::ns) - blk->blockLevelLastTouch;
+        if((tags->minBlockToggleRatio.value() == 0) || (tags->minBlockToggleRatio.value() > ((curTick() / SimClock::Int::ns) - blk->blockLevelLastTouch)))
+                        tags->minBlockToggleRatio = (curTick() / SimClock::Int::ns) - blk->blockLevelLastTouch;
+        blk->blockLevelLastTouch = curTick() / SimClock::Int::ns;
+        blk->blockLevelTouchOccurance++;
+    }
+}
 //AMHM End
 
 void
@@ -988,8 +1037,9 @@ BaseCache::satisfyRequest(PacketPtr pkt, CacheBlk *blk, bool, bool)
         assert(blk->isWritable());
         // Write or WriteLine at the first cache with block in writable state
         if (blk->checkWrite(pkt)) {
-            pkt->writeDataToBlock(blk->data, blkSize);
             //AMHM Start
+            accessRatioLogger(blk,pkt);
+            pkt->writeDataToBlock(blk->data, blkSize);
             HWLogger(blk);
             //AMHM End
         }
@@ -1081,7 +1131,9 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         {
             uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
             pkt->writeDataToBlock(pkt_data, blkSize);
-            blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency, HWCalculator(pkt_data),'w'); // A write packet is received            
+            blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency, HWCalculator(pkt_data),'w'); // A write packet is received
+            if(blk != NULL)
+                accessRatioLogger(blk,pkt);
         }            
         blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), tag_latency, 0, 'r'); // A read packet is received   
     } else
@@ -1164,6 +1216,8 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
             pkt->writeDataToBlock(pkt_data, blkSize);
             blk = allocateBlock(pkt, writebacks, HWCalculator(pkt_data));
+            if(blk != NULL)
+                accessRatioLogger(blk,pkt);
             //AMHM End
             if (!blk) {
                 // no replaceable block available: give up, fwd to next level.
@@ -1187,8 +1241,9 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         }
         // nothing else to do; writeback doesn't expect response
         assert(!pkt->needsResponse());
-        pkt->writeDataToBlock(blk->data, blkSize);
         //AMHM Start
+        accessRatioLogger(blk,pkt);
+        pkt->writeDataToBlock(blk->data, blkSize);
         HWLogger(blk);
         //AMHM End
         DPRINTF(Cache, "%s new state is %s\n", __func__, blk->print());
@@ -1228,6 +1283,8 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                 uint8_t *pkt_data = (uint8_t *) malloc(blkSize);
                 pkt->writeDataToBlock(pkt_data, blkSize);
                 blk = allocateBlock(pkt, writebacks, HWCalculator(pkt_data));
+                if(blk != NULL)
+                    accessRatioLogger(blk,pkt);
                 //AMHM End
                 if (!blk) {
                     // no replaceable block available: give up, fwd to
@@ -1250,6 +1307,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         }
         // nothing else to do; writeback doesn't expect response
         assert(!pkt->needsResponse());
+        accessRatioLogger(blk,pkt);
         pkt->writeDataToBlock(blk->data, blkSize);
         //AMHM Start
         HWLogger(blk);
@@ -1390,9 +1448,9 @@ BaseCache::handleFill(PacketPtr pkt, CacheBlk *blk, PacketList &writebacks,
         // sanity checks
         assert(pkt->hasData());
         assert(pkt->getSize() == blkSize);
-
-        pkt->writeDataToBlock(blk->data, blkSize);
         //AMHM Start
+        accessRatioLogger(blk,pkt);
+        pkt->writeDataToBlock(blk->data, blkSize);
         HWLogger(blk);
         //AMHM End
     }

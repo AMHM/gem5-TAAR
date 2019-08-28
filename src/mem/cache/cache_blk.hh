@@ -122,6 +122,13 @@ class CacheBlk : public ReplaceableEntry
      * meaningful if the block is valid.
      */
     Tick tickInserted;
+    
+    //AMHM Start
+    Tick bitLevelLastTouch[512];
+    long long int bitLevelTouchOccurance[512];
+    Tick blockLevelLastTouch;
+    long long int blockLevelTouchOccurance;    
+    //AMHM End
 
   protected:
     /**

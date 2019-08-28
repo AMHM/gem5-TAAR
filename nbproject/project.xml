@@ -6,7 +6,7 @@
             <name>gem5-FlexRel</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc,cpp</cpp-extensions>
-            <header-extensions>h,hh,hpp,inc</header-extensions>
+            <header-extensions>h,hh,inc</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>

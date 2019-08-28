@@ -656,6 +656,7 @@ class BaseCache : public MemObject
     //AMHM Start
     virtual int HWCalculator(uint8_t *blk);
     virtual void HWLogger(CacheBlk *blk);
+    virtual void accessRatioLogger(CacheBlk *blk, PacketPtr recivedPacket);
     //AMHM End
 
     /**

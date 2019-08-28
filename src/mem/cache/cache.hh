@@ -123,6 +123,7 @@ class Cache : public BaseCache
     
     //AMHM Start
     void HWLogger(CacheBlk *blk) override;
+    void accessRatioLogger(CacheBlk *blk, PacketPtr recivedPacket) override;
     //AMHM End
 
     void doTimingSupplyResponse(PacketPtr req_pkt, const uint8_t *blk_data,

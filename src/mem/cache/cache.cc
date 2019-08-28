@@ -159,6 +159,11 @@ void
 Cache::HWLogger(CacheBlk *blk) {
     BaseCache::HWLogger(blk);
 }
+
+void
+Cache::accessRatioLogger(CacheBlk *blk, PacketPtr recivedPacket) {
+    BaseCache::accessRatioLogger(blk, recivedPacket);
+}
 //AMHM End
 
 /////////////////////////////////////////////////////

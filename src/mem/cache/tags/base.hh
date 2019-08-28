@@ -70,6 +70,16 @@ class ReplaceableEntry;
  */
 class BaseTags : public ClockedObject
 {
+    //AMHM Start
+  public:
+    //Calculating the bit and block toggle ratio
+    Stats::Vector averageBitToggleRatio;
+    Stats::Vector minBitToggleRatio;
+    Stats::Vector maxBitToggleRatio;
+    Stats::Scalar averageBlockToggleRatio;
+    Stats::Scalar minBlockToggleRatio;
+    Stats::Scalar maxBlockToggleRatio;
+    //AMHM End
   protected:
     /** The block size of the cache. */
     const unsigned blkSize;
@@ -184,7 +194,7 @@ class BaseTags : public ClockedObject
     Stats::Scalar numberOfWriteWay12;
     Stats::Scalar numberOfWriteWay13;
     Stats::Scalar numberOfWriteWay14;
-    Stats::Scalar numberOfWriteWay15;    
+    Stats::Scalar numberOfWriteWay15;  
     //AMHM End
 
     /**

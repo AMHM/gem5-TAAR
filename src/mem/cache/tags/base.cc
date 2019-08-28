@@ -490,6 +490,37 @@ BaseTags::regStats()
         .name(name() + ".numberOfWriteWay15")
         .desc("AMHM: Number of write operations in way 15")
         ;
+    
+    averageBitToggleRatio
+        .init(512)
+        .name(name() + ".averageBitToggleRatio")
+        .desc("AMHM: Average nano-seconds between two consecutive writes (bit level)")
+        .flags(nozero | nonan)
+        ;
+    minBitToggleRatio
+        .init(512)
+        .name(name() + ".minBitToggleRatio")
+        .desc("AMHM: Min nano-seconds between two consecutive writes (bit level)")
+        .flags(nozero | nonan)
+        ;
+    maxBitToggleRatio
+        .init(512)
+        .name(name() + ".maxBitToggleRatio")
+        .desc("AMHM: Max nano-seconds between two consecutive writes (bit level)")
+        .flags(nozero | nonan)
+        ;
+    averageBlockToggleRatio
+        .name(name() + ".averageBlockToggleRatio")
+        .desc("AMHM: Average nano-seconds between two consecutive writes (Block level)")
+        ;
+    minBlockToggleRatio
+        .name(name() + ".minBlockToggleRatio")
+        .desc("AMHM: Min nano-seconds between two consecutive writes (Block level)")
+        ;
+    maxBlockToggleRatio
+        .name(name() + ".maxBlockToggleRatio")
+        .desc("AMHM: Max nano-seconds between two consecutive writes (Block level)s")
+        ;
     //AMHM End
 
     registerDumpCallback(new BaseTagsDumpCallback(this));
